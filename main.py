@@ -32,7 +32,6 @@ def extract_elements_with_classes(text):
 
 load_dotenv()
 
-SEARCH_API_KEY = os.getenv('SEARCH_API_KEY')
 YC_FOLDER_ID = os.getenv('YC_FOLDER_ID')
 YC_API_KEY = os.getenv('YC_API_KEY')
 YC_SEARCH_API_KEY = os.getenv('YC_SEARCH_API_KEY')
@@ -50,20 +49,11 @@ sdk = YCloudML(
 model = sdk.models.completions("yandexgpt")
 model = model.configure(temperature=0.2)
 
-url = "https://google-search72.p.rapidapi.com/search"
-
-headers = {
-	"x-rapidapi-key": SEARCH_API_KEY,
-	"x-rapidapi-host": "google-search72.p.rapidapi.com"
-}
-
-
 def search_web(query):
     # querystring = {"q":query,"lr":"ru-Ru","num":"2"}  
     querystring = {"query":query,"lr":"ru-Ru","num":"2","folderid":YC_FOLDER_ID,"apikey":YC_SEARCH_API_KEY}    
     try:
         response = requests.get('https://yandex.ru/search/xml/html', params=querystring)
-        # response = requests.get(url, headers=headers, params=querystring)
         response.raise_for_status()
         return extract_elements_with_classes(response.text)
     except Exception as e:
@@ -148,7 +138,7 @@ def handle_request():
     return jsonify({
         "id": data['id'],
         "answer": find_first_digit(res) if res !="null" else None,
-        "reasoning": reasoning,
+        "reasoning": reasoning + "\n Ответ сгенерирован YandexGPT",
         "sources": urls
     })
 
